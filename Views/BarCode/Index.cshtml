@@ -1,0 +1,197 @@
+﻿
+@using Dou.Misc.Extension
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+<script src="~/Scripts/html5-qrcode.min.v2.3.8.js"></script>
+<style>
+    #reader {
+        width: 640px;
+    }
+
+    @@media(max-width: 600px) {
+        #reader {
+            width: 300px;
+        }
+    }
+</style>
+<script>
+    function docReady(fn) {
+        // see if DOM is already available
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+            // call on next available tick
+            setTimeout(fn, 1);
+        } else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+    /** Ugly function to write the results to a table dynamically. */
+    function printScanResultPretty(codeId, decodedText, decodedResult) {
+        let resultSection = document.getElementById('scanned-result');
+        let tableBodyId = "scanned-result-table-body";
+        if (!document.getElementById(tableBodyId)) {
+            let table = document.createElement("table");
+            table.className = "styled-table";
+            table.style.width = "100%";
+            resultSection.appendChild(table);
+            let theader = document.createElement('thead');
+            let trow = document.createElement('tr');
+            let th1 = document.createElement('td');
+            th1.innerText = "Count";
+            let th2 = document.createElement('td');
+            th2.innerText = "Format";
+            let th3 = document.createElement('td');
+            th3.innerText = "Result";
+            trow.appendChild(th1);
+            trow.appendChild(th2);
+            trow.appendChild(th3);
+            theader.appendChild(trow);
+            table.appendChild(theader);
+            let tbody = document.createElement("tbody");
+            tbody.id = tableBodyId;
+            table.appendChild(tbody);
+        }
+        let tbody = document.getElementById(tableBodyId);
+        let trow = document.createElement('tr');
+        let td1 = document.createElement('td');
+        td1.innerText = `${codeId}`;
+        let td2 = document.createElement('td');
+        td2.innerText = `${decodedResult.result.format.formatName}`;
+        let td3 = document.createElement('td');
+        td3.innerText = `${decodedText}`;
+        trow.appendChild(td1);
+        trow.appendChild(td2);
+        trow.appendChild(td3);
+        tbody.appendChild(trow);
+    }
+    docReady(function () {
+        hljs.initHighlightingOnLoad();
+        var lastMessage;
+        var codeId = 0;
+        function onScanSuccess(decodedText, decodedResult) {
+            /**
+             * If you following the code example of this page by looking at the
+             * source code of the demo page - good job!!
+             *
+             * Tip: update this function with a success callback of your choise.
+             */
+            if (lastMessage !== decodedText) {
+                lastMessage = decodedText;
+                //printScanResultPretty(codeId, decodedText, decodedResult);
+                //1.條碼要有'-'且位置在5，2.條碼長度=13才處理，3.條碼第一位為數字
+                console.log(decodedText, decodedText.length, decodedText.indexOf("-"), /^-?\d+$/.test(decodedText.substr(0, 1)));
+                if (decodedText.indexOf("-") == 5 && decodedText.length == 13 && /^-?\d+$/.test(decodedText.substr(0, 1))) {
+                    console.log(decodedText);
+                    checkBarCode(decodedText);
+                }      
+                ++codeId;
+            }
+        }
+        var qrboxFunction = function (viewfinderWidth, viewfinderHeight) {
+            // Square QR Box, with size = 80% of the min edge.
+            var minEdgeSizeThreshold = 250;
+            var edgeSizePercentage = 0.75;
+            var minEdgeSize = (viewfinderWidth > viewfinderHeight) ?
+                viewfinderHeight : viewfinderWidth;
+            var qrboxEdgeSize = Math.floor(minEdgeSize * edgeSizePercentage);
+            if (qrboxEdgeSize < minEdgeSizeThreshold) {
+                if (minEdgeSize < minEdgeSizeThreshold) {
+                    return { width: minEdgeSize, height: minEdgeSize };
+                } else {
+                    return {
+                        width: minEdgeSizeThreshold,
+                        height: minEdgeSizeThreshold
+                    };
+                }
+            }
+            return { width: qrboxEdgeSize, height: qrboxEdgeSize };
+        }
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            {
+                fps: 10,
+                qrbox: qrboxFunction,
+                // Important notice: this is experimental feature, use it at your
+                // own risk. See documentation in
+                // mebjas/html5-qrcode/src/experimental-features.ts
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                },
+                rememberLastUsedCamera: true,
+                showTorchButtonIfSupported: true
+            });
+        html5QrcodeScanner.render(onScanSuccess);
+    });
+
+    //checkBarCode
+    function checkBarCode(log) {
+        var strtxb = $("#txBInput").val();
+        //console.log(strtxb);
+        var formdata = new FormData();
+        formdata.append("strBarcode", log);
+        formdata.append("txBstr", strtxb);
+
+        $.ajax({
+            //url: "http://120.100.100.227:8089/FtisBarcode/Barcode/decode",
+            //url: "../BarCode/SaveImage",
+            url: '@Url.Action("checkBarcode")',
+            //url: "https://pj3.ftis.org.tw/AssetSys/BarCode/SaveImage",
+            type: "POST",
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function () {
+                console.log('掃描中...');
+                //在發送前執行某些功能
+                $("#textBox1").val('掃描中...');
+                getVoices('掃描中');
+            },
+            success: function (res) {
+                console.log('success');               
+                $("#textBox1").val(res);
+                if (res.indexOf("盤點成功") > -1) {
+                    //getVoices(res);
+                    getVoices('check');
+                }
+            }
+        });
+        document.getElementById('txBInput').value = ''
+    };
+
+    function getVoices(log) {
+        var _iOSvoices = [{ name: "Mei-Jia", voiceURI: "com.apple.ttsbundle.Mei-Jia-compact", lang: "zh-TW", localService: true, "default": true },];
+        var voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            // use hard-coded list because speechSynthesis.getVoices() didn't work
+            voices = _iOSvoices;
+        }
+        var msg = new SpeechSynthesisUtterance(log);
+        msg.voice = voices[35]; // 每台電腦/瀏覽器結果可能略有不同
+        window.speechSynthesis.speak(msg);
+    };
+</script>
+
+<html>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12" style="text-align: center; margin-bottom: 20px;">
+                <div id="reader" style="display: inline-block;"></div>
+                <div class="empty"></div>
+                <div id="scanned-result"></div>
+            </div>
+            <div class="div_res">
+                <input type="text" id="textBox1" class="text-center" style="width: 99%; background-color: lightgreen; border: 0;" readonly>
+            </div>
+            <div class="div_input_txt">
+                <input type="text" id="txBInput" class="form-control" placeholder="請輸入資產編號"
+                        onkeypress="if (event.keyCode == 13) {checkBarCode();}" style="width: 99%; text-align: center; margin-top: 1vh;">
+            </div>
+            <div class="div_btn">
+                <input type="button" id="inputBarcode" class="btn btn-primary" value="手動盤點" onclick="checkBarCode()" style="width: 99%; text-align: center; margin-top: 1vh;" />
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

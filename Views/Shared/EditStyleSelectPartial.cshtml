@@ -1,0 +1,26 @@
+﻿<div id="edit_style">
+    <label><input type="radio" name="edit-style" value="modal" data-class="modal-sm" checked>modal-sm</label>
+    <label><input type="radio" name="edit-style" value="modal" data-class="modal-lg">modal-lg</label>
+    <label><input type="radio" name="edit-style" value="modal" data-class="modal-xl">modal-xl</label>
+    <label><input type="radio" name="edit-style" value="modal" data-class="modal-lg" data-height="fixed">modal-lg-center</label>
+    <label style="color:darkblue"><input type="radio" name="edit-style" value="bottom">bottom</label>
+    <label style="color:darkgreen"><input type="radio" name="edit-style" value="right">right</label>
+    <label style="color:darkred"><input type="radio" name="edit-style" value="showEditformOnly">edit only</label>
+    <label style="color:darkorange"><input type="radio" name="edit-style" value="detail">detail</label>
+</div>
+<script>
+$(document).ready(function () {
+    $('#edit_style input').on('change', function () {
+        var _opts = {
+            editformWindowStyle: $(this).val(),
+            editformWindowClasses: $(this).data('class'),
+            editformSize: { height: $(this).data('height') || 'auto'}
+        }
+        //alert($('.body-content  .dou-bootstrap-table:first > .fixed-table-container > .fixed-table-body > table:not(.fixed-table-loading)').length);
+        //alert($('.body-content .dou-bootstrap-table:first > .fixed-table-container > .fixed-table-body > table').length);
+        $('.body-content  .dou-bootstrap-table:first > .fixed-table-container > .fixed-table-body > table:not(.fixed-table-loading)').first().douTable('setOptions', _opts);
+    });
+
+@*    var $_table = $("#d_table").douTable(douoptions);*@
+});
+</script>

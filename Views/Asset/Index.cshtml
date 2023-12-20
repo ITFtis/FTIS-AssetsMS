@@ -1,0 +1,69 @@
+﻿<script src="~/Scripts/prj/Asset.js"></script>
+<script src="~/Scripts/gis/bootstraptable/extensions/export/bootstrap-table-export.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
+<script src="~/Scripts/gis/other/xlsx.full.min.js"></script>
+<script src="~/Scripts/jquery-3.6.0.intellisense.js"></script>
+@using Dou.Misc.Extension
+@Html.MenuMap()
+@Html.DataManagerOptionsJavascript(null, "douoptions")
+@using (Html.BeginForm("InventoryRpt", "Asset", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="download_button">
+        <button type="button" id="ExportData" class='btn btn-secondary' onclick="exportData()">
+            <span class="glyphicon glyphicon-export" aria-hidden="true">匯出當前資產清單</span>
+        </button>
+        <button type="submit" id="myExportData" class='btn btn-secondary'>
+            <span class="glyphicon glyphicon-export" aria-hidden="true">匯出總資產清單</span>
+        </button>
+    </div>
+}
+<table id="_table" style="font-size:0.8rem"></table>
+<div class="modal fade" id="ITPopUp" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm("ITAttributes", null, FormMethod.Post, new { @id = "adj" }))
+            {
+                <div class="modal-body">
+                    <h3>資訊資產明細-編輯</h3>
+                    <div class="form-group">
+                        <label for="AssetsAssetID">資產編號</label>
+                        <input id="AssetsAssetID" type="text" class="form-control" readonly disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="SN">序號</label>
+                        <input id="SN" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="OS">作業系統</label>
+                        <input id="OS" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="OfficeVersion">Office版本</label>
+                        <input id="OfficeVersion" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Iserise">CPU</label>
+                        <input id="Iserise" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="RAM">記憶體(單位：G)</label>
+                        <input id="RAM" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="SSD">固態硬碟容量(單位：G)</label>
+                        <input id="SSD" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="HDD">傳統硬碟容量(單位：G)</label>
+                        <input id="HDD" type="text" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="closeDialog()">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="editInfo()">確定</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

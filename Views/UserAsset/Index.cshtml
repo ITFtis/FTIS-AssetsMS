@@ -1,0 +1,30 @@
+﻿<script src="~/Scripts/gis/bootstraptable/extensions/export/bootstrap-table-export.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
+<script src="~/Scripts/gis/other/xlsx.full.min.js"></script>
+<script src="~/Scripts/jquery-3.6.0.intellisense.js"></script>
+@using Dou.Misc.Extension
+@Html.MenuMap()
+@Html.DataManagerOptionsJavascript(null, "douoptions")
+<table id="_table"></table>
+<script>
+        @*前端直接匯出xlsx*@
+        $(document).ready(function () {
+            douoptions.tableOptions.buttonsAlign = 'none';
+            douoptions.tableOptions.buttonsClass = 'default';
+            douoptions.tableOptions.showExport = true;
+            douoptions.tableOptions.iconsPrefix = "glyphicon";
+            douoptions.tableOptions.icons = { export: 'glyphicon-export' };
+            douoptions.tableOptions.exportTypes = ['xlsx'];
+            douoptions.tableOptions.exportOptions = { fileName: '個人資產表' };
+            douoptions.tableOptions.formatExport = function () { return "匯出Excel" }
+
+            $("#_table").DouEditableTable(douoptions);
+            $("input[data-fn='OrderNo']").hide();
+            //20230503, edit "select" to "input" by markhong
+            $("input[data-fn='CustodianID']").hide();
+            //20230503, edit "select" to "input" by markhong
+            $("input[data-fn='RecorderID']").hide();
+            //20230524, edit "select" to "input" by markhong
+            $("input[data-fn='AssetID']").hide();
+        });
+</script>
